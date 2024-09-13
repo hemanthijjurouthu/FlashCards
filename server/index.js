@@ -1,24 +1,25 @@
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
-require('dotenv').config()
+const bodyparser = require("body-parser");
 
 const app = express();
 app.use(cors());
-app.use(express.json());
-const path = require("path");
+app.use(bodyparser.json());
 
-app.use(express.static(path.join(__dirname,"/build")))
-
+// Directly using hardcoded MySQL credentials
 const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DATABASE 
+  host: 'localhost',
+  user: 'root',
+  password: 'Ram@1234#',
+  database: 'flashcards',
 });
 
 db.connect((err) => {
-  if (err) throw err;
+  if (err) {
+    console.error('Error connecting to the database:', err);
+    return;
+  }
   console.log('Connected to database');
 });
 
@@ -54,19 +55,5 @@ app.delete('/api/flashcards/:id', (req, res) => {
   });
 });
 
-app.put('/api/flashcards/:id', (req, res) => {
-  const { id } = req.params;
-  const { question, answer } = req.body;
-  db.query('UPDATE flashcards SET question = ?, answer = ? WHERE id = ?', [question, answer, id], (err, results) => {
-    if (err) throw err;
-    res.json(results);
-  });
-});
-
-app.get("*",(req,res)=>{
-  res.sendFile(path.join(__dirname,"/build/index.html"));
-})
-
-
-const PORT = process.env.PORT || 5000;
+const PORT = 10000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
